@@ -1,2 +1,2 @@
-# -omputer-vision
+# Computer vision
 Some computer vision algorithms
