@@ -1,0 +1,72 @@
+#include "opencv2\core\core.hpp"
+#include "opencv2\highgui\highgui.hpp"
+#include "opencv2\imgproc.hpp"
+#include "opencv2\imgcodecs.hpp"
+#include <iostream>
+#include <fstream>
+
+
+using namespace cv;
+using namespace std;
+
+Mat img; 
+Mat templ;
+Mat result;
+const char* image_window = "Source Image";
+const char* result_window = "Result window";
+
+int match_method=3;  //CV_TM_CCORR_NORMED
+
+/// Function Headers
+void MatchingMethod();
+
+
+int main()
+{
+  //! [load_image]
+  /// Load image and template
+  img = imread("итог/main_s.jpg", IMREAD_COLOR);
+  templ = imread("итог/own_23.jpg", IMREAD_COLOR);
+  MatchingMethod();
+  return 0;
+}
+
+/**
+* @function MatchingMethod
+*/
+v
+void MatchingMethod()
+{
+  //! [copy_source]
+  /// Source image to display
+  Mat img_display;
+  img.copyTo(img_display);
+  //! [copy_source]
+  
+  //! [create_result_matrix]
+  /// Create the result matrix
+  int result_cols = img.cols - templ.cols + 1;
+  int result_rows = img.rows - templ.rows + 1;
+  
+  result.create(result_rows, result_cols, CV_8U);
+  matchTemplate(img, templ, result, match_method);
+  normalize(result, result, 0, 1, NORM_MINMAX, -1, Mat());
+  double minVal; double maxVal; Point minLoc; Point maxLoc;
+  Point matchLoc;
+  minMaxLoc(result, &minVal, &maxVal, &minLoc, &maxLoc, Mat());
+  matchLoc = maxLoc;
+  rectangle(img_display, matchLoc, Point(matchLoc.x + templ.cols, matchLoc.y + templ.rows), Scalar::all(0), 2, 8, 0);
+  rectangle(result, matchLoc, Point(matchLoc.x + templ.cols, matchLoc.y + templ.rows), Scalar::all(0), 2, 8, 0);
+
+  namedWindow("image_window", WINDOW_NORMAL);
+  imshow("image_window", img_display);
+  namedWindow("result_window", WINDOW_NORMAL);
+  imshow("result_window", result);
+  result.convertTo(result, CV_8UC3, 255.0);
+  imwrite("итог/result_23_2.jpg", result);
+  imwrite("итог/main_result_23_2.jpg", img_display);
+  waitKey(0);
+
+  return;
+}
+
